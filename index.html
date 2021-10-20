@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/elementui.css" />
+    <style scoped>
+        #app {
+            height: 100%;
+            /* height: 100vh;
+        width: 100vw; */
+        }
+        
+        #title {
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            border-radius: 10px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .info_box {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            padding: 3%;
+            height: 50px;
+        }
+        
+        .box_label {
+            font-size: 20px;
+            margin-right: 5%;
+        }
+        
+        .el-header,
+        .el-footer {
+            text-align: center;
+            line-height: 60px;
+            height: 50px;
+        }
+        
+        .el-row {
+            margin-bottom: 20px;
+        }
+        
+        .el-col {
+            border-radius: 14px;
+        }
+        
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        
+        .bg-purple {
+            background: #d3dce6;
+        }
+        
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        
+        .grid-content {
+            /* border-radius: 14px; */
+            min-height: 36px;
+            height: 420px;
+        }
+        
+        .el-table .el-table__cell {
+            padding: 7px 0;
+            font-size: 16px;
+        }
+        
+        .el-card__body {
+            padding: 10px;
+            height: 100%;
+        }
+        
+        #propChart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .el-form-item__label {
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .el-input--small {
+            font-size: 15px;
+        }
+        
+        .el-aside {
+            padding: 10px;
+        }
+        
+        .aside_btn {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-container>
+            <el-aside width="150px">
+                <div class="aside_btn">
+                    <el-upload ref="upload" action="/" :show-file-list="false" :on-change="importExcel" :auto-upload="false">
+                        <el-button icon="el-icon-upload" size="small" type="primary">
+                            上传文件
+                        </el-button>
+                    </el-upload>
+                </div>
+                <div class="aside_btn">
+                    <el-button @click="exportFile">保存/导出文件</el-button>
+                </div>
+                <div class="aside_btn">
+                    <el-button @click="exportPic">导出图片</el-button>
+                </div>
+            </el-aside>
+            <el-container>
+                <el-header>
+                    <el-card id="title">青少年体育体适能测试卡</el-card>
+                </el-header>
+
+                <el-main>
+                    <div id="pic_res" ref="pic_res"></div>
+                    <div ref="main_test">
+                        <el-row :gutter="3">
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <div>
+                                        <el-form label-width="100px">
+                                            <el-form-item label="姓名">
+                                                <el-input v-model="userName"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="年龄">
+                                                <el-input v-model="userAge"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="身高(米)">
+                                                <el-input v-model="userHeight"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="体重(千克)">
+                                                <el-input v-model="userWeight"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="BMI">
+                                                <el-input v-model="userBMI"></el-input>
+                                            </el-form-item>
+                                        </el-form>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <el-table :data="propData" border style="width: 100%" class="tb-edit">
+                                        <el-table-column align="center" prop="item" label="项目">
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="first_test" label="第一次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            style="border: 0px solid #dcdfe6"
+                            size="small"
+                            v-model="scope.row.first_test"
+                            placeholder="请输入内容"
+                            @change="handlePropEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="second_test" label="第二次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            size="small"
+                            v-model="scope.row.second_test"
+                            placeholder="请输入内容"
+                            @change="handlePropEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <div id="propChart">
+                                        <canvas id="propChartRadar" width="100%" height="100%"></canvas>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="3">
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <el-table :data="sprintData" border style="width: 100%" class="tb-edit">
+                                        <el-table-column align="center" prop="item" label="项目">
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="first_test" label="第一次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            style="border: 0px solid #dcdfe6"
+                            size="small"
+                            v-model="scope.row.first_test"
+                            placeholder="请输入内容"
+                            @change="handleSprintEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="second_test" label="第二次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            size="small"
+                            v-model="scope.row.second_test"
+                            placeholder="请输入内容"
+                            @change="handleSprintEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <el-table :data="longJumpData" border style="width: 100%" class="tb-edit">
+                                        <el-table-column align="center" prop="item" label="项目">
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="first_test" label="第一次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            style="border: 0px solid #dcdfe6"
+                            size="small"
+                            v-model="scope.row.first_test"
+                            placeholder="请输入内容"
+                            @change="handleLongJumpEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="second_test" label="第二次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            size="small"
+                            v-model="scope.row.second_test"
+                            placeholder="请输入内容"
+                            @change="handleLongJumpEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <el-table :data="ropeData" border style="width: 100%" class="tb-edit">
+                                        <el-table-column align="center" prop="item" label="项目">
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="first_test" label="第一次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            style="border: 0px solid #dcdfe6"
+                            size="small"
+                            v-model="scope.row.first_test"
+                            placeholder="请输入内容"
+                            @change="handleRopeEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                        <el-table-column align="center" prop="second_test" label="第二次测试">
+                                            <template slot-scope="scope">
+                          <el-input
+                            size="small"
+                            v-model="scope.row.second_test"
+                            placeholder="请输入内容"
+                            @change="handleRopeEdit(scope.$index, scope.row)"
+                          ></el-input>
+                        </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                        <el-row :gutter="3">
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <div id="sprintChart">
+                                        <canvas id="sprintChartBar" width="100%" height="100%"></canvas>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <div id="longJumpChart">
+                                        <canvas id="longJumpChartBar" width="100%" height="100%"></canvas>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-card shadow="never">
+                                    <div id="ropeChart">
+                                        <canvas id="ropeChartBar" width="100%" height="100%"></canvas>
+                                    </div>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/element.js"></script>
+    <script src="./js/xlsx.core.min.js"></script>
+    <script src="./js/html2canvas.min.js"></script>
+    <script src="./js/chart.min.js"></script>
+
+    <script>
+        var vm = new Vue({
+            el: "#app",
+            created: function() {
+                // for (let i of this.propCol){
+
+                // }
+                for (let i of this.propCol) {
+                    this.propData.push({
+                        item: i,
+                        first_test: '',
+                        second_test: ''
+                    })
+                }
+
+                for (let i of this.longJumpCol) {
+                    this.longJumpData.push({
+                        item: i,
+                        first_test: '',
+                        second_test: ''
+                    })
+                }
+                for (let i of this.ropeCol) {
+                    this.ropeData.push({
+                        item: i,
+                        first_test: '',
+                        second_test: ''
+                    })
+                }
+                for (let i of this.sprintCol) {
+                    this.sprintData.push({
+                        item: i,
+                        first_test: '',
+                        second_test: ''
+                    })
+                }
+
+
+            },
+            watch: {
+                userName: function(val, oldVal) {
+                    this.dataFromXlxs["姓名"] = val;
+                },
+                userAge: function(val, oldVal) {
+                    this.dataFromXlxs["年龄"] = val;
+                },
+                userHeight: function(val, oldVal) {
+                    this.dataFromXlxs["身高"] = val;
+                    let bmi = this.calcBMI(val, this.userWeight);
+                    if (typeof bmi != "undefined") {
+                        this.userBMI = bmi;
+                    }
+                },
+                userWeight: function(val, oldVal) {
+                    this.dataFromXlxs["体重"] = val;
+                    let bmi = this.calcBMI(this.userHeight, val);
+                    if (typeof bmi != "undefined") {
+                        this.userBMI = bmi;
+                    }
+                },
+                userBMI: function(val, oldVal) {
+                    this.dataFromXlxs["BMI"] = val;
+                },
+            },
+            data: function() {
+                return {
+                    dataFromXlxs: {
+                        姓名: "",
+                        年龄: "",
+                        身高: "",
+                        体重: "",
+                        BMI: "",
+                        "协调性-第一次测试": "",
+                        "协调性-第二次测试": "",
+                        "敏感性-第一次测试": "",
+                        "敏感性-第二次测试": "",
+                        "注意力-第一次测试": "",
+                        "注意力-第二次测试": "",
+                        "爆发力-第一次测试": "",
+                        "爆发力-第二次测试": "",
+                        "速度-第一次测试": "",
+                        "速度-第二次测试": "",
+                        "耐力值-第一次测试": "",
+                        "耐力值-第二次测试": "",
+                        "立定跳远-第一次测试": "",
+                        "立定跳远-第二次测试": "",
+                        "跳绳-第一次测试": "",
+                        "跳绳-第二次测试": "",
+                        "50米跑-第一次测试": "",
+                        "50米跑-第二次测试": "",
+                        "400米跑-第一次测试": "",
+                        "400米跑-第二次测试": "",
+                    },
+                    userName: "",
+                    userAge: "",
+                    userHeight: "",
+                    userWeight: "",
+                    userBMI: "",
+                    propCol: ["敏感性", "耐力值", "协调性", "注意力", "爆发力", "速度"],
+                    propData: [],
+
+                    longJumpCol: ["立定跳远"],
+                    longJumpData: [],
+
+                    ropeCol: ["跳绳"],
+                    ropeData: [],
+
+                    sprintCol: ["50米跑", "400米跑"],
+                    sprintData: [],
+                    visible: false,
+                };
+            },
+            methods: {
+                calcBMI(h, w) {
+                    if (h != "" && w != "") {
+                        return Number(w) / (Number(h) * Number(h));
+                    }
+                },
+                tableCellStyle({
+                    row,
+                    column,
+                    rowIndex,
+                    columnIndex
+                }) {
+                    return "font-size:16px";
+                },
+                tableHeaderStyle({
+                    row,
+                    rowIndex
+                }) {
+                    return "font-size:16px";
+                },
+                exportPic() {
+
+                    html2canvas(this.$refs.main_test).then((canvas) => {
+                        this.$refs.pic_res.append(canvas);
+                        let link = document.createElement("a");
+                        link.href = canvas.toDataURL();
+                        link.setAttribute("download", this.userName + ".jpg");
+                        link.style.display = "none";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.getElementById('pic_res').innerHTML = ''
+                    });
+                },
+                exportFile() {
+                    let sheetData = [this.dataFromXlxs];
+                    let sheet = XLSX.utils.json_to_sheet(sheetData);
+                    let wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, sheet, "test");
+                    XLSX.writeFile(wb, this.userName + ".xlsx");
+                },
+                handleCurrentChange(row, event, column) {
+                    console.log(row, event, column, event.currentTarget);
+                },
+                handlePropEdit(index, row) {
+                    // modify data copy which be used to export
+                    let item = row.item;
+                    this.dataFromXlxs[item + "-第一次测试"] = String(row.first_test);
+                    this.dataFromXlxs[item + "-第二次测试"] = String(row.second_test);
+
+                    // modify data copy which be used to display
+                    for (let i in this.propData) {
+                        if (this.propData[i].item == item) {
+                            modify_col_name = index == 1 ? "first_test" : "second_test";
+                            this.propData[i][modify_col_name] = row[modify_col_name];
+                        }
+                    }
+                    this.renderPropChart(this.propData);
+                },
+                handleLongJumpEdit(index, row) {
+                    let item = row.item;
+                    this.dataFromXlxs[item + "-第一次测试"] = String(row.first_test);
+                    this.dataFromXlxs[item + "-第二次测试"] = String(row.second_test);
+
+                    for (let i in this.longJumpData) {
+                        if (this.longJumpData[i].item == item) {
+                            modify_col_name = index == 1 ? "first_test" : "second_test";
+                            this.longJumpData[i][modify_col_name] = row[modify_col_name];
+                        }
+                    }
+                    this.renderLongJumpChart(this.longJumpData);
+                },
+                handleRopeEdit(index, row) {
+                    let item = row.item;
+                    this.dataFromXlxs[item + "-第一次测试"] = String(row.first_test);
+                    this.dataFromXlxs[item + "-第二次测试"] = String(row.second_test);
+
+                    for (let i in this.ropeData) {
+                        if (this.ropeData[i].item == item) {
+                            modify_col_name = index == 1 ? "first_test" : "second_test";
+                            this.ropeData[i][modify_col_name] = row[modify_col_name];
+                        }
+                    }
+                    this.renderRopeChart(this.ropeData);
+                },
+
+                handleSprintEdit(index, row) {
+                    let item = row.item;
+                    this.dataFromXlxs[item + "-第一次测试"] = String(row.first_test);
+                    this.dataFromXlxs[item + "-第二次测试"] = String(row.second_test);
+                    for (let i in this.sprintData) {
+                        if (this.sprintData[i].item == item) {
+                            modify_col_name = index == 1 ? "first_test" : "second_test";
+                            this.sprintData[i][modify_col_name] = row[modify_col_name];
+                        }
+                    }
+                    this.renderSprintChart(this.sprintData);
+                },
+                initRenderData(xlsxJson) {
+                    let data_object = xlsxJson[0].sheet[0];
+                    for (let col in data_object) {
+                        this.dataFromXlxs[col] = data_object[col];
+                    }
+
+                    this.propData = [];
+                    this.longJumpData = [];
+                    this.ropeData = [];
+                    this.sprintData = [];
+
+                    for (let prop_col_name of this.propCol) {
+                        this.propData.push({
+                            item: prop_col_name,
+                            first_test: this.dataFromXlxs[prop_col_name + "-第一次测试"],
+                            second_test: this.dataFromXlxs[prop_col_name + "-第二次测试"],
+                        });
+                    }
+                    for (let longjump_col_name of this.longJumpCol) {
+                        this.longJumpData.push({
+                            item: longjump_col_name,
+                            first_test: this.dataFromXlxs[longjump_col_name + "-第一次测试"],
+                            second_test: this.dataFromXlxs[longjump_col_name + "-第二次测试"],
+                        });
+                    }
+
+                    for (let rope_col_name of this.ropeCol) {
+                        this.ropeData.push({
+                            item: rope_col_name,
+                            first_test: this.dataFromXlxs[rope_col_name + "-第一次测试"],
+                            second_test: this.dataFromXlxs[rope_col_name + "-第二次测试"],
+                        });
+                    }
+
+                    for (let sprint_col_name of this.sprintCol) {
+                        this.sprintData.push({
+                            item: sprint_col_name,
+                            first_test: this.dataFromXlxs[sprint_col_name + "-第一次测试"],
+                            second_test: this.dataFromXlxs[sprint_col_name + "-第二次测试"],
+                        });
+                    }
+
+                    this.renderPropChart(this.propData);
+                    this.renderLongJumpChart(this.longJumpData);
+                    this.renderRopeChart(this.ropeData);
+                    this.renderSprintChart(this.sprintData);
+
+                    this.userName = this.dataFromXlxs["姓名"];
+                    this.userAge = this.dataFromXlxs["年龄"];
+                    this.userHeight = this.dataFromXlxs["身高"];
+                    this.userWeight = this.dataFromXlxs["体重"];
+                    this.userBMI = this.dataFromXlxs["BMI"];
+                },
+
+                renderPropChart(propData) {
+                    let data_array = [
+                        [],
+                        []
+                    ];
+                    for (let item of propData) {
+                        data_array[0].push(Number(item.first_test));
+                        data_array[1].push(Number(item.second_test));
+                    }
+                    this.prop_chart_radar.data.datasets[0].data = data_array[0];
+                    this.prop_chart_radar.data.datasets[1].data = data_array[1];
+                    this.prop_chart_radar.update();
+                },
+                renderLongJumpChart(longJumpData) {
+                    let data_array = [0, 0, 0, 0];
+                    for (let item of longJumpData) {
+                        data_array[1] = Number(item.first_test);
+                        data_array[2] = Number(item.second_test);
+                    }
+                    this.long_jump_chart_bar.data.datasets[0].data = data_array;
+                    this.long_jump_chart_bar.update();
+                },
+
+                renderRopeChart(ropeData) {
+                    let data_array = [0, 0, 0, 0];
+                    for (let item of ropeData) {
+                        data_array[1] = Number(item.first_test);
+                        data_array[2] = Number(item.second_test);
+                    }
+                    this.rope_chart_bar.data.datasets[0].data = data_array;
+                    this.rope_chart_bar.update();
+                },
+                renderSprintChart(sprintData) {
+                    let data_array = [];
+                    for (let item of sprintData) {
+                        data_array.push([
+                            Number(item.first_test),
+                            Number(item.second_test),
+                        ]);
+                    }
+                    for (let i in data_array) {
+                        this.sprint_chart_bar.data.datasets[i].data = data_array[i];
+                    }
+                    this.sprint_chart_bar.update();
+                },
+
+
+                importExcel(file) {
+                    return new Promise(function(resolve, reject) {
+                        let reader = new FileReader()
+                        reader.onload = function(e) {
+                            let data = e.target.result;
+                            this.wb = XLSX.read(data, {
+                                type: "binary",
+                            });
+                            let result = [];
+                            this.wb.SheetNames.forEach((sheetName) => {
+                                result.push({
+                                    sheetName: sheetName,
+                                    sheet: XLSX.utils.sheet_to_json(this.wb.Sheets[sheetName]),
+                                });
+                            });
+
+                            if (result && result.length > 0) {
+                                this.xlsxJson = result
+                                vm.initRenderData(this.xlsxJson)
+                            }
+                        };
+                        reader.readAsBinaryString(file.raw);
+                    });
+                },
+            },
+            mounted() {
+                var that = this;
+                Chart.defaults.font.size = 15;
+                that.ctx_prop_radar = document
+                    .getElementById("propChartRadar")
+                    .getContext("2d");
+                // Chart.defaults.font.size = 16;
+                that.prop_chart_radar = new Chart(that.ctx_prop_radar, {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    type: "radar",
+                    data: {
+                        labels: this.propCol,
+
+                        datasets: [{
+                            label: "第一次测试",
+                            data: [0, 0, 0, 0, 0, 0],
+                            fill: true,
+                            backgroundColor: "rgba(255, 99, 132, 0.2)",
+                            borderColor: "rgb(255, 99, 132)",
+                            pointBackgroundColor: "rgb(255, 99, 132)",
+                            pointBorderColor: "#fff",
+                            pointHoverBackgroundColor: "#fff",
+                            pointHoverBorderColor: "rgb(255, 99, 132)",
+                        }, {
+                            label: "第二次测试",
+                            data: [0, 0, 0, 0, 0, 0],
+                            fill: true,
+                            backgroundColor: "rgba(54, 162, 235, 0.2)",
+                            borderColor: "rgb(54, 162, 235)",
+                            pointBackgroundColor: "rgb(54, 162, 235)",
+                            pointBorderColor: "#fff",
+                            pointHoverBackgroundColor: "#fff",
+                            pointHoverBorderColor: "rgb(54, 162, 235)",
+                        }, ],
+                    },
+
+                    options: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                fontSize: 16,
+                            },
+                        },
+                        elements: {
+                            line: {
+                                borderWidth: 2,
+                            },
+                        },
+                        scale: {
+                            ticks: {
+                                fontSize: 14,
+                            },
+                            yAxies: {
+                                fontSize: 18,
+                            },
+                            xAxies: {
+                                fontSize: 18,
+                            },
+                        },
+                        radius: {
+                            fontSize: 20,
+                        },
+                    },
+                });
+
+                that.ctx_long_jump_bar = document
+                    .getElementById("longJumpChartBar")
+                    .getContext("2d");
+                // Chart.defaults.font.size = 16;
+                that.long_jump_chart_bar = new Chart(that.ctx_long_jump_bar, {
+                    type: "bar",
+                    data: {
+                        labels: ["", "第一次测试", "第二次测试", ""],
+
+                        datasets: [{
+                            label: "测试",
+                            data: [0, 0, 0, 0],
+                            backgroundColor: " rgba(102, 178, 255, 0.65)",
+                            borderColor: "rgba(102, 178, 255, 0.65)",
+                        }, ],
+                    },
+
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "立定跳远测试",
+                            },
+                        },
+                    },
+                });
+
+                that.ctx_rope_bar = document
+                    .getElementById("ropeChartBar")
+                    .getContext("2d");
+                // Chart.defaults.font.size = 16;
+                that.rope_chart_bar = new Chart(that.ctx_rope_bar, {
+                    type: "bar",
+                    data: {
+                        labels: ["", "第一次测试", "第二次测试", ""],
+
+                        datasets: [{
+                            label: "测试",
+                            data: [0, 0, 0, 0],
+                            backgroundColor: " rgba(102, 178, 255, 0.65)",
+                            borderColor: "rgba(102, 178, 255, 0.65)",
+                        }, ],
+                    },
+
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "跳绳测试",
+                            },
+                        },
+                    },
+                });
+
+                that.ctx_sprint_bar = document
+                    .getElementById("sprintChartBar")
+                    .getContext("2d");
+                // Chart.defaults.font.size = 16;
+                that.sprint_chart_bar = new Chart(that.ctx_sprint_bar, {
+                    type: "bar",
+                    data: {
+                        labels: ["第一次测试", "第二次测试"],
+
+                        datasets: [{
+                            label: "50米跑",
+                            data: [0, 0],
+                            backgroundColor: " rgba(102, 178, 255, 0.65)",
+                            borderColor: "rgba(102, 178, 255, 0.65)",
+                        }, {
+                            label: "400米跑",
+                            data: [0, 0],
+                            backgroundColor: " rgba(255, 77, 77, 0.65)",
+                            borderColor: "rgba(255, 77, 77, 0.65)",
+                        }, ],
+                    },
+
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "跑步测试",
+                            },
+                        },
+                    },
+                });
+            },
+        });
+    </script>
+</body>
+
+</html>
