@@ -21,7 +21,7 @@
             justify-content: center;
             height: 100%;
             border-radius: 10px;
-            font-size: 28px;
+            font-size: 42px;
             font-weight: bold;
         }
         
@@ -42,7 +42,7 @@
         .el-footer {
             text-align: center;
             line-height: 60px;
-            height: 50px;
+            height: 80px !important;
         }
         
         .el-row {
@@ -102,6 +102,15 @@
         .aside_btn {
             margin-bottom: 5px;
         }
+        
+        .el-input-group__append {
+            padding: 0 4px;
+        }
+        
+        .image {
+            width: 80px;
+            height: 80px
+        }
     </style>
 </head>
 
@@ -125,7 +134,21 @@
             </el-aside>
             <el-container>
                 <el-header>
-                    <el-card id="title">青少年体育体适能测试卡</el-card>
+
+
+                    <!-- <el-image style="width: 50px; height: 50px" src="./pic/微信图片_20211020223622.jpg" fit="fill"></el-image> -->
+                    <el-card id="title">
+                        <div style="display: flex;align-items: center;">
+                            <div style="display: flex;"><img src="./pic/微信图片_20211020223622.jpg" class="image"></div>
+                            <div style="display: flex;">上海市青少年
+
+                                <div style="display: flex;color: #ff2f2f;">F</div>
+                                <div style="display: flex;color: #2bca39;">S</div>
+                                <div style="display: flex;color: #e2ad3a;">C</div>
+                                <div style="display: flex;color: #2f90ff;">A</div>体适能测试卡
+                            </div>
+                        </div>
+                    </el-card>
                 </el-header>
 
                 <el-main>
@@ -197,7 +220,9 @@
                                 <el-card shadow="never">
                                     <el-table :data="sprintData" border style="width: 100%" class="tb-edit">
                                         <el-table-column align="center" prop="item" label="项目">
+
                                         </el-table-column>
+
                                         <el-table-column align="center" prop="first_test" label="第一次测试">
                                             <template slot-scope="scope">
                           <el-input
@@ -206,8 +231,8 @@
                             v-model="scope.row.first_test"
                             placeholder="请输入内容"
                             @change="handleSprintEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">秒</template></el-input>
+                                            </template>
                                         </el-table-column>
                                         <el-table-column align="center" prop="second_test" label="第二次测试">
                                             <template slot-scope="scope">
@@ -216,8 +241,9 @@
                             v-model="scope.row.second_test"
                             placeholder="请输入内容"
                             @change="handleSprintEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">秒</template></el-input>
+
+                                            </template>
                                         </el-table-column>
                                     </el-table>
                                 </el-card>
@@ -235,8 +261,8 @@
                             v-model="scope.row.first_test"
                             placeholder="请输入内容"
                             @change="handleLongJumpEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">厘米</template></el-input>
+                                            </template>
                                         </el-table-column>
                                         <el-table-column align="center" prop="second_test" label="第二次测试">
                                             <template slot-scope="scope">
@@ -245,8 +271,8 @@
                             v-model="scope.row.second_test"
                             placeholder="请输入内容"
                             @change="handleLongJumpEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">厘米</template></el-input>
+                                            </template>
                                         </el-table-column>
                                     </el-table>
                                 </el-card>
@@ -264,8 +290,8 @@
                             v-model="scope.row.first_test"
                             placeholder="请输入内容"
                             @change="handleRopeEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">个</template></el-input>
+                                            </template>
                                         </el-table-column>
                                         <el-table-column align="center" prop="second_test" label="第二次测试">
                                             <template slot-scope="scope">
@@ -274,8 +300,8 @@
                             v-model="scope.row.second_test"
                             placeholder="请输入内容"
                             @change="handleRopeEdit(scope.$index, scope.row)"
-                          ></el-input>
-                        </template>
+                          ><template slot="append">个</template></el-input>
+                                            </template>
                                         </el-table-column>
                                     </el-table>
                                 </el-card>
@@ -326,34 +352,32 @@
                 for (let i of this.propCol) {
                     this.propData.push({
                         item: i,
-                        first_test: '',
-                        second_test: ''
-                    })
+                        first_test: "",
+                        second_test: "",
+                    });
                 }
 
                 for (let i of this.longJumpCol) {
                     this.longJumpData.push({
                         item: i,
-                        first_test: '',
-                        second_test: ''
-                    })
+                        first_test: "",
+                        second_test: "",
+                    });
                 }
                 for (let i of this.ropeCol) {
                     this.ropeData.push({
                         item: i,
-                        first_test: '',
-                        second_test: ''
-                    })
+                        first_test: "",
+                        second_test: "",
+                    });
                 }
                 for (let i of this.sprintCol) {
                     this.sprintData.push({
                         item: i,
-                        first_test: '',
-                        second_test: ''
-                    })
+                        first_test: "",
+                        second_test: "",
+                    });
                 }
-
-
             },
             watch: {
                 userName: function(val, oldVal) {
@@ -449,7 +473,6 @@
                     return "font-size:16px";
                 },
                 exportPic() {
-
                     html2canvas(this.$refs.main_test).then((canvas) => {
                         this.$refs.pic_res.append(canvas);
                         let link = document.createElement("a");
@@ -458,7 +481,7 @@
                         link.style.display = "none";
                         document.body.appendChild(link);
                         link.click();
-                        document.getElementById('pic_res').innerHTML = ''
+                        document.getElementById("pic_res").innerHTML = "";
                     });
                 },
                 exportFile() {
@@ -625,10 +648,9 @@
                     this.sprint_chart_bar.update();
                 },
 
-
                 importExcel(file) {
                     return new Promise(function(resolve, reject) {
-                        let reader = new FileReader()
+                        let reader = new FileReader();
                         reader.onload = function(e) {
                             let data = e.target.result;
                             this.wb = XLSX.read(data, {
@@ -643,8 +665,8 @@
                             });
 
                             if (result && result.length > 0) {
-                                this.xlsxJson = result
-                                vm.initRenderData(this.xlsxJson)
+                                this.xlsxJson = result;
+                                vm.initRenderData(this.xlsxJson);
                             }
                         };
                         reader.readAsBinaryString(file.raw);
