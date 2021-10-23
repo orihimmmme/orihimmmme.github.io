@@ -21,7 +21,7 @@
             justify-content: center;
             height: 100%;
             border-radius: 10px;
-            font-size: 42px;
+            font-size: 44px;
             font-weight: bold;
         }
         
@@ -73,7 +73,7 @@
         
         .el-table .el-table__cell {
             padding: 7px 0;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .el-card__body {
@@ -88,7 +88,7 @@
         
         .el-form-item__label {
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
         }
         
         .el-input--small {
@@ -110,6 +110,14 @@
         .image {
             width: 80px;
             height: 80px
+        }
+        
+        .foot_img {
+            width: 100%;
+        }
+        
+        #foot {
+            display: flex;
         }
     </style>
 </head>
@@ -133,27 +141,27 @@
                 </div>
             </el-aside>
             <el-container>
-                <el-header>
+                <div id="pic_res" ref="pic_res"></div>
+                <div ref="main_test">
+                    <el-header>
+                        <!-- <el-image style="width: 50px; height: 50px" src="./pic/微信图片_20211020223622.jpg" fit="fill"></el-image> -->
+                        <el-card id="title">
+                            <div style="display: flex;align-items: center;">
+                                <div style="display: flex;"><img src="./pic/微信图片_20211020223622.jpg" class="image"></div>
+                                <div style="display: flex;">上海市青少年
 
-
-                    <!-- <el-image style="width: 50px; height: 50px" src="./pic/微信图片_20211020223622.jpg" fit="fill"></el-image> -->
-                    <el-card id="title">
-                        <div style="display: flex;align-items: center;">
-                            <div style="display: flex;"><img src="./pic/微信图片_20211020223622.jpg" class="image"></div>
-                            <div style="display: flex;">上海市青少年
-
-                                <div style="display: flex;color: #ff2f2f;">F</div>
-                                <div style="display: flex;color: #2bca39;">S</div>
-                                <div style="display: flex;color: #e2ad3a;">C</div>
-                                <div style="display: flex;color: #2f90ff;">A</div>体适能测试卡
+                                    <div style="display: flex;color: #ff2f2f;">F</div>
+                                    <div style="display: flex;color: #2bca39;">S</div>
+                                    <div style="display: flex;color: #e2ad3a;">C</div>
+                                    <div style="display: flex;color: #2f90ff;">A</div>体适能测试卡
+                                </div>
                             </div>
-                        </div>
-                    </el-card>
-                </el-header>
+                        </el-card>
+                    </el-header>
 
-                <el-main>
-                    <div id="pic_res" ref="pic_res"></div>
-                    <div ref="main_test">
+                    <el-main>
+
+
                         <el-row :gutter="3">
                             <el-col :span="8">
                                 <el-card shadow="never">
@@ -330,8 +338,18 @@
                                 </el-card>
                             </el-col>
                         </el-row>
-                    </div>
-                </el-main>
+
+                        <div id="foot" v-show="img_display">
+                            <div style="display: flex;">
+                                <img class="foot_img" src="./pic/foot_img1.jpg">
+                            </div>
+                            <div style="display: flex;">
+                                <img class="foot_img" src="./pic/foot_img2.jpg">
+                            </div>
+                        </div>
+
+                    </el-main>
+                </div>
             </el-container>
         </el-container>
     </div>
@@ -346,9 +364,6 @@
         var vm = new Vue({
             el: "#app",
             created: function() {
-                // for (let i of this.propCol){
-
-                // }
                 for (let i of this.propCol) {
                     this.propData.push({
                         item: i,
@@ -406,6 +421,7 @@
             },
             data: function() {
                 return {
+                    img_display: true,
                     dataFromXlxs: {
                         姓名: "",
                         年龄: "",
@@ -453,6 +469,7 @@
                 };
             },
             methods: {
+
                 calcBMI(h, w) {
                     if (h != "" && w != "") {
                         return Number(w) / (Number(h) * Number(h));
@@ -473,7 +490,9 @@
                     return "font-size:16px";
                 },
                 exportPic() {
+
                     html2canvas(this.$refs.main_test).then((canvas) => {
+
                         this.$refs.pic_res.append(canvas);
                         let link = document.createElement("a");
                         link.href = canvas.toDataURL();
@@ -482,6 +501,7 @@
                         document.body.appendChild(link);
                         link.click();
                         document.getElementById("pic_res").innerHTML = "";
+                        // this.img_display = false;
                     });
                 },
                 exportFile() {
@@ -499,7 +519,6 @@
                     let item = row.item;
                     this.dataFromXlxs[item + "-第一次测试"] = String(row.first_test);
                     this.dataFromXlxs[item + "-第二次测试"] = String(row.second_test);
-
                     // modify data copy which be used to display
                     for (let i in this.propData) {
                         if (this.propData[i].item == item) {
@@ -675,7 +694,7 @@
             },
             mounted() {
                 var that = this;
-                Chart.defaults.font.size = 15;
+                Chart.defaults.font.size = 18;
                 that.ctx_prop_radar = document
                     .getElementById("propChartRadar")
                     .getContext("2d");
@@ -714,7 +733,7 @@
                         legend: {
                             display: true,
                             labels: {
-                                fontSize: 16,
+                                fontSize: 18,
                             },
                         },
                         elements: {
@@ -723,14 +742,17 @@
                             },
                         },
                         scale: {
+                            min: 0,
+                            max: 5,
                             ticks: {
                                 fontSize: 14,
+
                             },
                             yAxies: {
-                                fontSize: 18,
+                                fontSize: 20,
                             },
                             xAxies: {
-                                fontSize: 18,
+                                fontSize: 20,
                             },
                         },
                         radius: {
